@@ -1,0 +1,3 @@
+package com.dukankhata.pos.dto;
+import jakarta.validation.constraints.*; import java.math.BigDecimal; import java.util.UUID;
+public record SaleItemRequest(UUID productId,@NotBlank(message="Item name is required") @Size(max=160,message="Item name must not exceed 160 characters") String itemName,@NotNull(message="Unit price is required") @DecimalMin(value="0.01",message="Unit price must be greater than 0") BigDecimal unitPrice,@NotNull(message="Quantity is required") @DecimalMin(value="0.001",message="Quantity must be greater than 0") BigDecimal quantity,String hsnCode,@DecimalMin(value="0.00") @DecimalMax(value="100.00") BigDecimal gstRate) {}

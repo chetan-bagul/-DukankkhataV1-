@@ -1,0 +1,1 @@
+package com.dukankhata.subscription.dto; import java.math.BigDecimal; import java.util.UUID; public record PlanResponse(UUID id,String code,String name,BigDecimal amount,String currency,Integer durationDays){}

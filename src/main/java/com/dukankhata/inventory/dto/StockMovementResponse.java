@@ -1,0 +1,3 @@
+package com.dukankhata.inventory.dto;
+import com.dukankhata.inventory.StockMovement; import com.dukankhata.inventory.StockMovementType; import java.math.BigDecimal; import java.time.Instant; import java.util.UUID;
+public record StockMovementResponse(UUID id,UUID productId,String productName,StockMovementType type,BigDecimal quantity,BigDecimal balanceAfter,String note,Instant createdAt){ public static StockMovementResponse from(StockMovement m){return new StockMovementResponse(m.getId(),m.getProduct().getId(),m.getProduct().getName(),m.getType(),m.getQuantity(),m.getBalanceAfter(),m.getNote(),m.getCreatedAt());}}

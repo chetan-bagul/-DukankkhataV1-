@@ -1,0 +1,3 @@
+package com.dukankhata.returns.dto;
+import com.dukankhata.returns.*; import java.math.BigDecimal; import java.time.Instant; import java.util.*;
+public record ReturnResponse(UUID id,UUID saleId,String invoiceNumber,BigDecimal refundTotal,String reason,String status,Instant createdAt,List<Refund> refunds){ public record Refund(String method,BigDecimal amount){} public static ReturnResponse from(SaleReturn r,List<ReturnRefund> refs){return new ReturnResponse(r.getId(),r.getSale().getId(),r.getSale().getInvoiceNumber(),r.getRefundTotal(),r.getReason(),r.getStatus().name(),r.getCreatedAt(),refs.stream().map(x->new Refund(x.getMethod().name(),x.getAmount())).toList());}}

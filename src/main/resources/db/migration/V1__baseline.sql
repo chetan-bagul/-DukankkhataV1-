@@ -1,0 +1,6 @@
+-- DukanKhata legacy schema baseline.
+--
+-- Existing installations were historically managed by Hibernate ddl-auto.
+-- Flyway version 1 marks that schema generation point without recreating or
+-- dropping any existing business data. Future schema changes must be added as
+-- numbered Flyway migrations and should not be implemented with ddl-auto.

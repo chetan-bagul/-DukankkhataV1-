@@ -1,0 +1,1 @@
+package com.dukankhata.closing.dto; import jakarta.validation.constraints.*; import java.math.BigDecimal; import java.util.UUID; public record ClosingItemRequest(@NotNull UUID productId,@NotNull @DecimalMin(value="0.001",message="Quantity must be greater than zero") BigDecimal quantity){}

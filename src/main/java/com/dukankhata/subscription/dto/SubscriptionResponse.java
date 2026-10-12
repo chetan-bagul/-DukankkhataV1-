@@ -1,0 +1,1 @@
+package com.dukankhata.subscription.dto; import com.dukankhata.subscription.SubscriptionStatus; import java.time.Instant; public record SubscriptionResponse(String planCode,String planName,SubscriptionStatus status,Instant startsAt,Instant endsAt,String razorpayOrderId){}

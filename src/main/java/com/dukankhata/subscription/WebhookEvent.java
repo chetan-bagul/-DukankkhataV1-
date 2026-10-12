@@ -1,0 +1,4 @@
+package com.dukankhata.subscription;
+import jakarta.persistence.*; import java.time.Instant; import java.util.UUID;
+@Entity @Table(name="webhook_events", uniqueConstraints=@UniqueConstraint(name="uk_webhook_event_id",columnNames="provider_event_id"))
+public class WebhookEvent { @Id @GeneratedValue(strategy=GenerationType.UUID) private UUID id; @Column(name="provider_event_id",nullable=false,length=120) private String providerEventId; @Column(nullable=false,length=60) private String eventType; @Column(nullable=false) private Instant receivedAt; @PrePersist void onCreate(){receivedAt=Instant.now();} public UUID getId(){return id;} public String getProviderEventId(){return providerEventId;} public String getEventType(){return eventType;} public void setProviderEventId(String v){providerEventId=v;} public void setEventType(String v){eventType=v;} }

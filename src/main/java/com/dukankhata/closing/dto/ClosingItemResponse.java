@@ -1,0 +1,1 @@
+package com.dukankhata.closing.dto; import java.math.BigDecimal; import java.util.UUID; public record ClosingItemResponse(UUID productId,String productName,BigDecimal unitPrice,BigDecimal quantity,BigDecimal amount){}

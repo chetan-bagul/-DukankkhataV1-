@@ -1,0 +1,18 @@
+package com.dukankhata.staff;
+import com.dukankhata.common.exception.*; import com.dukankhata.common.security.CurrentUserService; import com.dukankhata.staff.dto.*; import com.dukankhata.shop.Shop; import org.springframework.stereotype.Service; import org.springframework.transaction.annotation.Transactional; import java.math.*; import java.util.*;
+@Service public class StaffService{
+ private final StaffRepository staff; private final StaffLedgerRepository ledger; private final CurrentUserService current;
+ public StaffService(StaffRepository s,StaffLedgerRepository l,CurrentUserService c){staff=s;ledger=l;current=c;}
+ @Transactional(readOnly=true) public List<StaffResponse> list(){UUID shop=current.shopId();return staff.findByShopIdOrderByActiveDescNameAsc(shop).stream().map(s->StaffResponse.from(s,money(ledger.balance(s.getId())))).toList();}
+ @Transactional public StaffResponse create(StaffRequest r){Staff s=new Staff();s.setShop(current.requireUser().getShop());apply(s,r);return StaffResponse.from(staff.save(s),BigDecimal.ZERO.setScale(2));}
+ @Transactional public StaffResponse update(UUID id,StaffRequest r){Staff s=staff.findByIdAndShopId(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Staff not found"));apply(s,r);return StaffResponse.from(staff.save(s),money(ledger.balance(id)));}
+ @Transactional public void delete(UUID id){Staff s=staff.findByIdAndShopId(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Staff not found"));s.setActive(false);staff.save(s);}
+ @Transactional(readOnly=true) public List<StaffLedgerResponse> ledger(UUID id){require(id);return ledger.findByStaffIdOrderByCreatedAtDesc(id).stream().map(StaffLedgerResponse::from).toList();}
+ @Transactional public StaffLedgerResponse payout(UUID id,StaffPayoutRequest r){Staff s=staff.findForUpdate(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Active staff not found"));BigDecimal bal=ledger.balance(id);BigDecimal amount=money(r.amount());if(bal.compareTo(amount)<0)throw new BusinessException("Payout cannot exceed pending commission. Pending: ₹"+money(bal));return addEntry(s,StaffLedgerType.PAYOUT,amount.negate(),r.description(),null);}
+ @Transactional public StaffLedgerResponse adjustment(UUID id,StaffAdjustmentRequest r){Staff s=staff.findForUpdate(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Active staff not found"));return addEntry(s,StaffLedgerType.ADJUSTMENT,money(r.amount()),r.description(),null);}
+ @Transactional public void earn(UUID id,BigDecimal amount,UUID saleId,String invoice){Staff s=staff.findForUpdate(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Active staff not found"));if(ledger.existsByReferenceIdAndType(saleId,StaffLedgerType.COMMISSION_EARNED))return;addEntry(s,StaffLedgerType.COMMISSION_EARNED,money(amount),"Commission for "+invoice,saleId);}
+ private StaffLedgerResponse addEntry(Staff s,StaffLedgerType t,BigDecimal a,String d,UUID ref){StaffLedgerEntry e=new StaffLedgerEntry();e.setStaff(s);e.setType(t);e.setAmount(a);e.setDescription(d.trim());e.setReferenceId(ref);return StaffLedgerResponse.from(ledger.save(e));}
+ private void apply(Staff s,StaffRequest r){s.setName(r.name().trim());s.setMobile(r.mobile()==null?null:r.mobile().trim());s.setCommissionRate(money(r.commissionRate()));if(r.active()!=null)s.setActive(r.active());}
+ private Staff require(UUID id){return staff.findByIdAndShopId(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Staff not found"));}
+ private BigDecimal money(BigDecimal x){return x.setScale(2,RoundingMode.HALF_UP);}
+}

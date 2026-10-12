@@ -1,0 +1,1 @@
+package com.dukankhata.closing.dto; import jakarta.validation.constraints.*; import java.math.BigDecimal; public record ClosingExpenseRequest(@NotBlank String description,@NotNull @DecimalMin(value="0.01",message="Expense must be greater than zero") BigDecimal amount){}

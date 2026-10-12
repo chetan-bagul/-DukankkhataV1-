@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: dukankhata-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://db.upmkrhntmwjyqqunzwud.supabase.co:5432/postgres?sslmode=require}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      # Transitional mode for the existing schema. Flyway now owns versioned
+      # migrations; ddl-auto will be disabled after the legacy baseline is
+      # confirmed in a real PostgreSQL environment.
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    open-in-view: false
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE:true}
+    baseline-version: ${FLYWAY_BASELINE_VERSION:1}
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT:2s}
+      timeout: ${REDIS_TIMEOUT:2s}
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: never
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  rate-limit:
+    login:
+      capacity: ${LOGIN_RATE_LIMIT_CAPACITY:10}
+      refill-interval-ms: ${LOGIN_RATE_LIMIT_REFILL_INTERVAL_MS:12000}
+      state-ttl-ms: ${LOGIN_RATE_LIMIT_STATE_TTL_MS:120000}
+
+app:
+  business-time-zone: ${BUSINESS_TIME_ZONE:Asia/Kolkata}
+  observability:
+    slow-request-ms: ${SLOW_REQUEST_MS:1000}
+
+razorpay:
+  key-id: ${RAZORPAY_KEY_ID:}
+  key-secret: ${RAZORPAY_KEY_SECRET:}
+  webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+
+subscription:
+  trial-days: ${SUBSCRIPTION_TRIAL_DAYS:30}
+  plans:
+    small-monthly: ${SUBSCRIPTION_SMALL_MONTHLY:150}
+    small-yearly: ${SUBSCRIPTION_SMALL_YEARLY:1500}
+    large-monthly: ${SUBSCRIPTION_LARGE_MONTHLY:199}
+    large-yearly: ${SUBSCRIPTION_LARGE_YEARLY:1999}
+
+notifications:
+  worker:
+    fixed-delay-ms: ${NOTIFICATION_WORKER_FIXED_DELAY_MS:5000}
