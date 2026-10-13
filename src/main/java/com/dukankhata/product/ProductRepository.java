@@ -12,6 +12,8 @@ import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findAllByShopIdAndActiveTrueOrderByNameAsc(UUID shopId);
+    @Query("select p from Product p where p.shop.id=:shopId and p.active=true and p.currentStock<=p.reorderLevel order by p.name asc")
+    List<Product> findLowStockByShopId(@Param("shopId") UUID shopId);
     Optional<Product> findByIdAndShopId(UUID id, UUID shopId);
     Optional<Product> findByIdAndShopIdAndActiveTrue(UUID id, UUID shopId);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
