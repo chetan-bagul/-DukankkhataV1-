@@ -1,7 +1,9 @@
 package com.dukankhata.common.cache;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,12 +21,23 @@ public class CacheService {
     }
 
     public <T> Optional<T> get(String key, Class<T> type) {
-        String value = redis.opsForValue().get(key);
+        String value = read(key);
         if (value == null) return Optional.empty();
         try {
             return Optional.of(objectMapper.readValue(value, type));
         } catch (JsonProcessingException ex) {
-            redis.delete(key);
+            deleteQuietly(key);
+            return Optional.empty();
+        }
+    }
+
+    public <T> Optional<T> get(String key, TypeReference<T> type) {
+        String value = read(key);
+        if (value == null) return Optional.empty();
+        try {
+            return Optional.of(objectMapper.readValue(value, type));
+        } catch (JsonProcessingException ex) {
+            deleteQuietly(key);
             return Optional.empty();
         }
     }
@@ -33,11 +46,28 @@ public class CacheService {
         try {
             redis.opsForValue().set(key, objectMapper.writeValueAsString(value), ttl);
         } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("Unable to serialize cache value", ex);
+            return;
+        } catch (DataAccessException ex) {
+            return;
         }
     }
 
     public void evict(String key) {
-        redis.delete(key);
+        deleteQuietly(key);
+    }
+
+    private String read(String key) {
+        try {
+            return redis.opsForValue().get(key);
+        } catch (DataAccessException ex) {
+            return null;
+        }
+    }
+
+    private void deleteQuietly(String key) {
+        try {
+            redis.delete(key);
+        } catch (DataAccessException ignored) {
+        }
     }
 }
