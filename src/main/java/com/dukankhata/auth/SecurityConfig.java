@@ -90,6 +90,9 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of(
                 "Authorization", "Content-Type", "Idempotency-Key"
         ));
+        config.setExposedHeaders(List.of(
+                "X-Page", "X-Page-Size", "X-Has-More"
+        ));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =

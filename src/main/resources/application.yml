@@ -12,6 +12,9 @@ spring:
       # confirmed in a real PostgreSQL environment.
       ddl-auto: ${JPA_DDL_AUTO}
     open-in-view: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: ${HIBERNATE_DEFAULT_BATCH_FETCH_SIZE:32}
   flyway:
     enabled: ${FLYWAY_ENABLED}
     baseline-on-migrate: ${FLYWAY_BASELINE_ON_MIGRATE}

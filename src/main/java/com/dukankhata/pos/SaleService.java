@@ -50,7 +50,7 @@ public class SaleService {
   return SaleResponse.from(saved);
  }
  @Transactional(readOnly=true) public SaleResponse get(UUID id){return SaleResponse.from(sales.findByIdAndShopId(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Sale not found")));}
- @Transactional(readOnly=true) public List<SaleResponse> list(){return sales.findAllByShopIdOrderByCreatedAtDesc(current.shopId()).stream().map(SaleResponse::from).toList();}
+ @Transactional(readOnly=true) public org.springframework.data.domain.Slice<SaleResponse> list(int page,int size){var pageable=org.springframework.data.domain.PageRequest.of(page,size);return sales.findAllByShopIdOrderByCreatedAtDescIdDesc(current.shopId(),pageable).map(SaleResponse::from);}
  private String nextInvoice(UUID shopId){
   ZoneId zone = ZoneId.of("Asia/Kolkata");
   LocalDate today = LocalDate.now(zone);

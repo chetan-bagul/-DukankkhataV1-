@@ -3,7 +3,7 @@ import com.dukankhata.common.exception.*; import com.dukankhata.common.security.
 @Service public class StaffService{
  private final StaffRepository staff; private final StaffLedgerRepository ledger; private final CurrentUserService current;
  public StaffService(StaffRepository s,StaffLedgerRepository l,CurrentUserService c){staff=s;ledger=l;current=c;}
- @Transactional(readOnly=true) public List<StaffResponse> list(){UUID shop=current.shopId();return staff.findByShopIdOrderByActiveDescNameAsc(shop).stream().map(s->StaffResponse.from(s,money(ledger.balance(s.getId())))).toList();}
+ @Transactional(readOnly=true) public List<StaffResponse> list(){UUID shop=current.shopId();Map<UUID,BigDecimal> balances=new HashMap<>();for(Object[] row:ledger.balancesByShopId(shop))balances.put((UUID)row[0],(BigDecimal)row[1]);return staff.findByShopIdOrderByActiveDescNameAsc(shop).stream().map(s->StaffResponse.from(s,money(balances.getOrDefault(s.getId(),BigDecimal.ZERO)))).toList();}
  @Transactional public StaffResponse create(StaffRequest r){Staff s=new Staff();s.setShop(current.requireUser().getShop());apply(s,r);return StaffResponse.from(staff.save(s),BigDecimal.ZERO.setScale(2));}
  @Transactional public StaffResponse update(UUID id,StaffRequest r){Staff s=staff.findByIdAndShopId(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Staff not found"));apply(s,r);return StaffResponse.from(staff.save(s),money(ledger.balance(id)));}
  @Transactional public void delete(UUID id){Staff s=staff.findByIdAndShopId(id,current.shopId()).orElseThrow(()->new ResourceNotFoundException("Staff not found"));s.setActive(false);staff.save(s);}
